@@ -1,0 +1,1 @@
+{"mappings":"AAGaA,SAASC,cAAc,gBAClBD,SAASC,cAAc","sources":["src/index.js"],"sourcesContent":["\n\n\nconst form = document.querySelector(\".search-form\");\nconst container = document.querySelector(\".img-container\");\n\n"],"names":["document","querySelector"],"version":3,"file":"index.00318d75.js.map"}
