@@ -39,3 +39,14 @@
     background-color: chocolate;
     border-radius: 20px;
 }
+.load-more {
+    border-style: none;
+        height: 7VH;
+        @media screen and (min-height: 650px) {
+            height: 5vh;
+        }
+        width: 10VH;
+        background-color: chocolate;
+        border-radius: 20px;
+        align-self: center;
+}
