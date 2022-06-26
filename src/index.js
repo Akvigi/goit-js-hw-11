@@ -1,26 +1,59 @@
-// import { Notify } from 'notiflix/build/notiflix-notify-aio'
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// import { axios } from 'axios';
+// import * as axios from 'axios';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-
-const form = document.querySelector(".search-form");
-const container = document.querySelector(".img-container");
-
-const searchInput = form.elements.searchQuery
+const form = document.querySelector('.search-form');
+const container = document.querySelector('.imgs-container');
+const loadMore = document.querySelector('.load-more');
+const searchInput = form.elements.searchQuery;
 let markup;
+// const lightbox = new SimpleLightbox('.img-block a', {
+//   captions: true,
+//   captionsData: 'alt',
+//   captionDelay: 250,
+// });
+const currentQuery = {
+  query: '',
+  page: 1,
+  getQuery: function () {
+    return new URLSearchParams({
+      page: currentQuery.page,
+      per_page: 20,
+      key: '28235798-10089aa8a519f6d1c62a23eff',
+      q: searchInput.value,
+      image_type: 'photo',
+      orientation: 'horizontal',
+      safesearch: true,
+    });
+  },
+};
 
 const searchParams = new URLSearchParams({
-    page: 1,
-    per_page: 20,
-    key: "28235798-10089aa8a519f6d1c62a23eff",
-    q: searchInput.value, 
-    image_type: "photo",
-    orientation: "horizontal",
-    safesearch: true,
-})
+  page: 1,
+  per_page: 40,
+  key: '28235798-10089aa8a519f6d1c62a23eff',
+  q: searchInput.value,
+  image_type: 'photo',
+  orientation: 'horizontal',
+  safesearch: true,
+});
 
 function doMarkupForImgs(items) {
-    markup = items.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>{
+  markup = items
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
         return `<div class='img-block'>
-                    <img src="${webformatURL}" alt="${tags}" loading="lazy">
+                     <a href="${largeImageURL}"><img class= "img-item" src="${webformatURL}" alt="${tags}" loading="lazy"></a>
                         <div class="info">
                             <p class="info-item">
                                 <b>Likes</b>
@@ -40,35 +73,77 @@ function doMarkupForImgs(items) {
                             </p>
                         </div>
                 </div> `;
-    }).join('')
-};
-
-;
+      }
+    )
+    .join('');
+  container.insertAdjacentHTML('beforeEnd', markup);
+  const lightbox = new SimpleLightbox('.img-block a', {
+    captions: true,
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
+}
 
 const fetchImg = async () => {
-    const query = await fetch(`https://pixabay.com/api/${searchParams}`)
-    const imgs = await query.json()
-    if (!imgs.ok) {
-        throw new Error(imgs.status);
+  try {
+    const query = await fetch(
+      `https://pixabay.com/api/?${currentQuery.getQuery()}`
+    );
+    if (!query.ok) {
+      throw new Error(query.status);
     }
-    return imgs
+    const imgs = await query.json();
+    return imgs.hits;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+async function search(event) {
+  if (event) {
+    event.preventDefault();
+    container.innerHTML = '';
+  }
+  currentQuery.query = searchInput.value;
+  await fetchImg().then(imgs => {
+    if (imgs.length === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
+    doMarkupForImgs(imgs);
+  });
+  lightbox.refresh();
 }
 
-function search() {
-    container.innerHTML = ""
-    fetchImg().then( imgs => { 
-        doMarkupForImgs(imgs)
-    })
-}
+form.addEventListener('submit', search);
+loadMore.addEventListener('click', () => {
+  currentQuery.page += 1;
+  search();
+});
+container.addEventListener('click', () => lightbox.refresh());
 
-// const query = async () => {
-//   try {
-//
-//     const users = await fetchImg();
-//     console.log(users);
-//   } catch (error) {
-//     console.log(error.message);
+// function useLightbox(e) {
+//   e.preventDefault();
+// if (lightbox) {
+//   const lightbox = '';
+// }
+
+// .refresh();
+// e.preventDefault();
+// const { target: itemImg } = e;
+// if (e.target.nodeName !== 'IMG') {
+//   return;
+// }
+// const instance = basicLightbox.create(`
+//               <div class="modal">
+//                   <img src=${itemImg.dataset.source}>
+//               </div>`);
+// instance.show();
+// function pressEsc(e) {
+//   if (e.key === 'Escape') {
+//     instance.close();
 //   }
-// };
-
-form.addEventListener("submit", fetchImg)
+// }
+// document.addEventListener('keydown', pressEsc);
+// }
