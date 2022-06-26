@@ -1,6 +1,6 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 // import { axios } from 'axios';
-// import * as axios from 'axios';
+import * as axios from 'axios';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -9,18 +9,20 @@ const container = document.querySelector('.imgs-container');
 const loadMore = document.querySelector('.load-more');
 const searchInput = form.elements.searchQuery;
 let markup;
-// const lightbox = new SimpleLightbox('.img-block a', {
-//   captions: true,
-//   captionsData: 'alt',
-//   captionDelay: 250,
-// });
+
+const lightbox = new SimpleLightbox('.imgs-container .img-block a', {
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
 const currentQuery = {
   query: '',
   page: 1,
   getQuery: function () {
     return new URLSearchParams({
       page: currentQuery.page,
-      per_page: 20,
+      per_page: 40,
       key: '28235798-10089aa8a519f6d1c62a23eff',
       q: searchInput.value,
       image_type: 'photo',
@@ -30,9 +32,9 @@ const currentQuery = {
   },
 };
 
+// console.log(currentQuery.getQuery().toString());
+
 const searchParams = new URLSearchParams({
-  page: 1,
-  per_page: 40,
   key: '28235798-10089aa8a519f6d1c62a23eff',
   q: searchInput.value,
   image_type: 'photo',
@@ -77,23 +79,27 @@ function doMarkupForImgs(items) {
     )
     .join('');
   container.insertAdjacentHTML('beforeEnd', markup);
-  const lightbox = new SimpleLightbox('.img-block a', {
-    captions: true,
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
+  lightbox.refresh();
 }
 
 const fetchImg = async () => {
   try {
-    const query = await fetch(
-      `https://pixabay.com/api/?${currentQuery.getQuery()}`
-    );
-    if (!query.ok) {
-      throw new Error(query.status);
+    const now = currentQuery.getQuery().toString();
+    // const all = searchParams.toString();
+    const query = await axios({
+      method: 'get',
+      url: `https://pixabay.com/api/?${now}`,
+    });
+    // const queryAll = await axios({
+    //   method: 'get',
+    //   url: `https://pixabay.com/api/?${all}`,
+    // });
+    console.log(query);
+    const imgs = await query.data.hits;
+    if (imgs.length > 0) {
+      Notify.success(`Hooray! We found ${query.data.totalHits} images.`);
     }
-    const imgs = await query.json();
-    return imgs.hits;
+    return imgs;
   } catch (error) {
     console.log(error.message);
   }
@@ -113,7 +119,6 @@ async function search(event) {
     }
     doMarkupForImgs(imgs);
   });
-  lightbox.refresh();
 }
 
 form.addEventListener('submit', search);
@@ -121,29 +126,3 @@ loadMore.addEventListener('click', () => {
   currentQuery.page += 1;
   search();
 });
-container.addEventListener('click', () => lightbox.refresh());
-
-// function useLightbox(e) {
-//   e.preventDefault();
-// if (lightbox) {
-//   const lightbox = '';
-// }
-
-// .refresh();
-// e.preventDefault();
-// const { target: itemImg } = e;
-// if (e.target.nodeName !== 'IMG') {
-//   return;
-// }
-// const instance = basicLightbox.create(`
-//               <div class="modal">
-//                   <img src=${itemImg.dataset.source}>
-//               </div>`);
-// instance.show();
-// function pressEsc(e) {
-//   if (e.key === 'Escape') {
-//     instance.close();
-//   }
-// }
-// document.addEventListener('keydown', pressEsc);
-// }
