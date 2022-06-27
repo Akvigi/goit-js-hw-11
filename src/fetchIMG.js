@@ -1,15 +1,15 @@
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import * as axios from 'axios';
-// import { searchInput } from './index.js';
+import { changeableQuery } from './index.js';
 
 const form = document.querySelector('.search-form');
 const searchInput = form.elements.searchQuery;
 const currentQuery = {
   query: '',
-  page: 0,
+  page: 1,
   getQuery: function () {
     return new URLSearchParams({
-      page: currentQuery.page,
+      page: (currentQuery.page += 1),
       per_page: 40,
       key: '28235798-10089aa8a519f6d1c62a23eff',
       q: searchInput.value,
@@ -31,14 +31,14 @@ async function queryA() {
 
 export const fetchImg = async () => {
   try {
-    currentQuery.page += 1;
+    // if (event) {
+    //   event.preventDefault();
+    //   container.innerHTML = '';
+    // }
+    // currentQuery.page += 1;
     currentQuery.query = searchInput.value;
     const query = await queryA();
-    const imgs = await query.data.hits;
-    if (imgs.length > 0) {
-      Notify.success(`Hooray! We found ${query.data.totalHits} images.`);
-    }
-    return imgs;
+    return query;
   } catch (error) {
     console.log(error.message);
   }
