@@ -2,7 +2,6 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import { fetchImg } from './fetchIMG.js';
-// import { currentPage } from './fetchIMG.js';
 
 const form = document.querySelector('.search-form');
 const container = document.querySelector('.imgs-container');
@@ -10,22 +9,6 @@ const loadMore = document.querySelector('.load-more');
 const searchInput = form.elements.searchQuery;
 
 let markup;
-
-// const changeableQuery = {
-//   query: '',
-//   page: 1,
-// getQuery: function () {
-//   return new URLSearchParams({
-//     page: currentQuery.page,
-//     per_page: 40,
-//     key: '28235798-10089aa8a519f6d1c62a23eff',
-//     q: searchInput.value,
-//     image_type: 'photo',
-//     orientation: 'horizontal',
-//     safesearch: true,
-//   });
-// },
-// };
 
 const lightbox = new SimpleLightbox('.imgs-container .img-block a', {
   captions: true,
@@ -75,8 +58,13 @@ function doMarkupForImgs(items) {
 
 async function fetchRender() {
   await fetchImg().then(query => {
+    // const {
+    //   config: {
+    //     params: { page, per_page },
+    //   },
+    //   data: { hits, totalHits },
+    // } = query;
     const imgs = query.data.hits;
-
     if (imgs.length > 0) {
       Notify.success(`Hooray! We found ${query.data.totalHits} images.`);
     }
@@ -84,9 +72,14 @@ async function fetchRender() {
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+      // loadMore.setAttribute('hidden');
       return;
     }
     doMarkupForImgs(imgs);
+    if (imgs.length < 40) {
+      Notify.info("We're sorry, but you've reached the end of search results.");
+      loadMore.setAttribute('hidden');
+    }
   });
 }
 
@@ -97,6 +90,7 @@ async function search(event) {
   }
   if (searchInput.value === '') {
     Notify.failure('Please input a query');
+    loadMore.setAttribute('hidden');
     return;
   }
   fetchRender();
@@ -110,5 +104,3 @@ async function searchMore(e) {
 
 form.addEventListener('submit', search);
 loadMore.addEventListener('click', searchMore);
-
-// export { changeableQuery };
