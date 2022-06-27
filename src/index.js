@@ -73,8 +73,8 @@ async function search(event) {
       );
     }
     doMarkupForImgs(imgs);
-    loadMore.removeAttribute('hidden');
   });
+  loadMore.removeAttribute('hidden');
 }
 
 form.addEventListener('submit', search);
