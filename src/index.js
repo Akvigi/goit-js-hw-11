@@ -1,7 +1,7 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { fetchImg } from './fetchIMG.js';
+import { fetchImg, resetPage, pageNow } from './fetchIMG.js';
 
 const form = document.querySelector('.search-form');
 const container = document.querySelector('.imgs-container');
@@ -65,36 +65,38 @@ async function fetchRender() {
     //   data: { hits, totalHits },
     // } = query;
     const imgs = query.data.hits;
-    if (imgs.length > 0) {
+    const page = pageNow();
+    if (imgs.length > 0 && page === 1) {
       Notify.success(`Hooray! We found ${query.data.totalHits} images.`);
     }
     if (imgs.length === 0) {
+      loadMore.setAttribute('hidden', 'hidden');
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
-      // loadMore.setAttribute('hidden');
       return;
     }
     doMarkupForImgs(imgs);
+    loadMore.removeAttribute('hidden');
     if (imgs.length < 40) {
+      loadMore.setAttribute('hidden', 'hidden');
       Notify.info("We're sorry, but you've reached the end of search results.");
-      loadMore.setAttribute('hidden');
     }
   });
 }
 
 async function search(event) {
+  resetPage();
   if (event) {
     event.preventDefault();
     container.innerHTML = '';
   }
   if (searchInput.value === '') {
+    loadMore.setAttribute('hidden', 'hidden');
     Notify.failure('Please input a query');
-    loadMore.setAttribute('hidden');
     return;
   }
   fetchRender();
-  loadMore.removeAttribute('hidden');
 }
 
 async function searchMore(e) {

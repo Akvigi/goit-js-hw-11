@@ -18,6 +18,14 @@ const currentQuery = {
   },
 };
 
+export function resetPage() {
+  currentQuery.page = 0;
+}
+
+export function pageNow() {
+  return currentQuery.page;
+}
+
 async function queryA() {
   const now = currentQuery.getQuery().toString();
   const query = await axios({
