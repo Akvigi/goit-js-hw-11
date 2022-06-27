@@ -1,12 +1,10 @@
-// import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import * as axios from 'axios';
-import { changeableQuery } from './index.js';
 
 const form = document.querySelector('.search-form');
 const searchInput = form.elements.searchQuery;
 const currentQuery = {
   query: '',
-  page: 1,
+  page: 0,
   getQuery: function () {
     return new URLSearchParams({
       page: (currentQuery.page += 1),
@@ -31,11 +29,6 @@ async function queryA() {
 
 export const fetchImg = async () => {
   try {
-    // if (event) {
-    //   event.preventDefault();
-    //   container.innerHTML = '';
-    // }
-    // currentQuery.page += 1;
     currentQuery.query = searchInput.value;
     const query = await queryA();
     return query;
@@ -43,5 +36,3 @@ export const fetchImg = async () => {
     console.log(error.message);
   }
 };
-
-// export { currentQuery } from './fetchIMG.js';

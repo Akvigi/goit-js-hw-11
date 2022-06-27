@@ -76,6 +76,7 @@ function doMarkupForImgs(items) {
 async function fetchRender() {
   await fetchImg().then(query => {
     const imgs = query.data.hits;
+
     if (imgs.length > 0) {
       Notify.success(`Hooray! We found ${query.data.totalHits} images.`);
     }
@@ -83,6 +84,7 @@ async function fetchRender() {
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+      return;
     }
     doMarkupForImgs(imgs);
   });
